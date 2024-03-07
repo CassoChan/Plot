@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/casun/plot/main.cpp
+matplotlibcpp.h
+/home/casun/plot/matplotlibcpp.h
+cmath
+-
+iostream
+-
+fstream
+-
+cassert
+-
+string
+-
+vector
+-
+sstream
+-
+
