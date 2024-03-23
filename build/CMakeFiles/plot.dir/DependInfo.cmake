@@ -21,10 +21,10 @@ set(CMAKE_TARGET_DEFINITIONS_CXX
 # The include file search paths:
 set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "/usr/include/python3.8"
+  "/usr/include/eigen3"
   "/usr/include/vtk-7.1"
   "/usr/include/freetype2"
   "/usr/include/pcl-1.10"
-  "/usr/include/eigen3"
   "/usr/include/ni"
   "/usr/include/openni2"
   "/usr/local/include/opencv"
