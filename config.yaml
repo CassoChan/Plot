@@ -1,0 +1,12 @@
+MapFile_address: "/home/casun/PoseData/map1.pgm"       # 地图路径
+OriginFile_address: "/home/casun/PoseData/OriginPose/OriginPose.txt"  # 初始化原点路径
+TrajectoryFile_address: "/home/casun/PoseData/Trajectory/2024-03-23 16_55_00.txt"  # 轨迹路径
+
+radius: 0.4           # 热力图搜索半径
+TPointSize: 20         # 轨迹点的大小
+MapPointSize: 20
+origin_x: -15.093980  # 地图的原点偏移，在map.yaml
+origin_y: -28.889954  # 地图的原点偏移，在map.yaml
+resolution: 0.050000  # 地图分辨率，在map.yaml
+OffSetByHand_x: 0     # 手动偏移x
+OffSetByHand_y: 50    # 手动偏移y
