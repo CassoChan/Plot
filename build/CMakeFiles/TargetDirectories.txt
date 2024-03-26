@@ -1,3 +1,0 @@
-/home/casun/plot3/build/CMakeFiles/rebuild_cache.dir
-/home/casun/plot3/build/CMakeFiles/edit_cache.dir
-/home/casun/plot3/build/CMakeFiles/plot2.dir

@@ -84,11 +84,11 @@ int main()
     YAML::Node config;
     try
     {
-        config = YAML::LoadFile("/home/casun/plot3/config.yaml");
+        config = YAML::LoadFile("../config.yaml");
     }
     catch (YAML::BadFile &e)
     {
-        std::cout << "read error!" << std::endl;
+        std::cout << "config.yaml read error!" << std::endl;
         return -1;
     }
 
@@ -100,6 +100,7 @@ int main()
     float resolution = config["resolution"].as<float>();
     float OffSetByHand_x = config["OffSetByHand_x"].as<float>();
     float OffSetByHand_y = config["OffSetByHand_y"].as<float>();
+    string OutputFileName = config["OutputFileName"].as<string>();
 
     pybind11::scoped_interpreter guard{};
     auto plt = matplotlibcpp17::pyplot::import();
@@ -122,7 +123,7 @@ int main()
     }
     plt.figure(Args(), Kwargs("figsize"_a = py::make_tuple(dstImage.cols / 10.0, dstImage.rows / 10.0)));
     plt.scatter(Args(map_x, map_y),
-               Kwargs("c"_a = map_color, "s"_a = MapPointSize, "cmap"_a = "Greys"));
+                Kwargs("c"_a = map_color, "s"_a = MapPointSize, "cmap"_a = "Greys"));
 
     // /**
     //  * 读入原点坐标的修改
@@ -201,19 +202,18 @@ int main()
         ValidPoint.push_back(b);
     }
 
-    plt.scatter(Args(x, y),
-               Kwargs("c"_a = ValidPoint, "s"_a = TPointSize, "cmap"_a = "jet"));
+    auto cs = plt.scatter(Args(x, y),
+                          Kwargs("c"_a = ValidPoint, "s"_a = TPointSize, "cmap"_a = "jet"));
 
     plt.title(Args("Trajectory"));
+    plt.colorbar(Args(cs.unwrap()));
 
-    // plt.colorbar(Args(ValidPoint.unwrap()), Kwargs("ax"_a = plt.unwrap()));
-
-    std::string folderpath = "/home/casun/plot3/drawing";
+    std::string folderpath = "../drawing";
     if (access(folderpath.c_str(), 0) == -1)
     {
         mkdir(folderpath.c_str(), 0777);
     }
-    plt.savefig(Args("/home/casun/plot3/drawing/integration.png"));
-    // plt.show();
+    string Output = folderpath + "/" + OutputFileName + ".png";
+    plt.savefig(Args(Output));
     return 0;
 }

@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.15)
-project (plot2)
+project (plot)
 
 SET(CMAKE_CXX_STANDARD 17)
 
@@ -28,6 +28,6 @@ find_package(yaml-cpp REQUIRED)
 include_directories(${YAML_CPP_INCLUDE_DIR})
 
 
-add_executable(plot2 main.cpp)
-target_include_directories(plot2 PUBLIC ${Python3_INCLUDE_DIRS})
-target_link_libraries(plot2 ${Python3_LIBRARIES} ${OpenCV_LIBS} ${PCL_LIBRARIES} yaml-cpp pybind11::embed matplotlibcpp17::matplotlibcpp17)
+add_executable(${PROJECT_NAME} main.cpp)
+target_include_directories(${PROJECT_NAME} PUBLIC ${Python3_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} ${Python3_LIBRARIES} ${OpenCV_LIBS} ${PCL_LIBRARIES} yaml-cpp pybind11::embed matplotlibcpp17::matplotlibcpp17)
