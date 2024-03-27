@@ -1,11 +1,6 @@
 #include <matplotlibcpp17/pyplot.h>
-#include <cmath>
 #include <iostream>
-#include <fstream>
-#include <cassert>
-#include <string>
 #include <vector>
-#include <sstream>
 
 #include <pcl/point_cloud.h>
 #include <pcl/kdtree/kdtree_flann.h>
@@ -28,6 +23,7 @@ vector<float> x;
 vector<float> y;
 vector<float> angle;
 vector<float> ValidPoint;
+bool check = true;
 
 float to_float(string s)
 {
@@ -125,9 +121,9 @@ int main()
     plt.scatter(Args(map_x, map_y),
                 Kwargs("c"_a = map_color, "s"_a = MapPointSize, "cmap"_a = "Greys"));
 
-    // /**
-    //  * 读入原点坐标的修改
-    //  */
+    /**
+     * @brief 读入原点坐标的修改
+     */
     ifstream OriginFile(config["OriginFile_address"].as<string>());
     assert(OriginFile);
     OriginFile.seekg(0, ios::end);
@@ -172,11 +168,13 @@ int main()
     for (auto i = v.begin(); i != v.end();)
     {
         time.push_back(*i++);
-        Eigen::Vector3d p1 = Eigen::Vector3d(stof(*i++), stof(*i++), 0.0);
+        float co_x = stof(*i++);
+        float co_y = stof(*i++);
+        Eigen::Vector3d p1 = Eigen::Vector3d(co_x, co_y, 0.0); // 不要用指针，x86会从右往左读，导致先计算p[1]，再计算p[0];
         Eigen::Vector3d pw;
         pw = q1 * p1 + t1;
-        x.push_back(pw[1]);
-        y.push_back(pw[0]);
+        x.push_back(pw[0]);
+        y.push_back(pw[1]);
         angle.push_back(stof(*i++));
     }
 
@@ -201,6 +199,15 @@ int main()
         int b = kdtree.radiusSearch(cloud->points[i], radius, pointIdxRadiusSearch, pointRadiusSquaredDistance);
         ValidPoint.push_back(b);
     }
+
+    // 初始化后的原点
+    plt.scatter(Args(0, 0),
+                Kwargs("c"_a = "r", "s"_a = MapPointSize * 100, "marker"_a = "*"));
+    // 图片原点
+    plt.scatter(Args(-OriginOffset[0], -OriginOffset[1]),
+                Kwargs("c"_a = "y", "s"_a = MapPointSize * 100, "marker"_a = "."));
+    // 箭头指向，坐标变换用，图片原点指向初始化后原点
+    // plt.quiver(Args(-OriginOffset[0], -OriginOffset[1], OriginOffset[0], OriginOffset[1]), Kwargs("units"_a = "width"))
 
     auto cs = plt.scatter(Args(x, y),
                           Kwargs("c"_a = ValidPoint, "s"_a = TPointSize, "cmap"_a = "jet"));

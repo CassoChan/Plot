@@ -1,9 +1,9 @@
 # 地图路径
 MapFile_address: "../../PoseData/map1.pgm"
 # 初始化原点路径                                
-OriginFile_address: "../../PoseData/OriginPose/OriginPose.txt"
+OriginFile_address: "../../PoseData/OriginPose/OriginPose1.txt"
 # 轨迹路径
-TrajectoryFile_address: "../../PoseData/Trajectory/2024-03-23 16_55_00.txt"
+TrajectoryFile_address: "../../PoseData/Trajectory/2024-03-27 09_18_42.txt"
 
 radius: 0.4           # 热力图搜索半径
 TPointSize: 20        # 轨迹点的大小
