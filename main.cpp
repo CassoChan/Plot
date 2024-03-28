@@ -146,7 +146,6 @@ int main()
         while (getline(OriginFile, lastLine, ','))
         {
             OriginOffset1.push_back(to_float(lastLine));
-            // cout << to_float(lastLine) << endl;
         }
         OriginFile.close();
     }
@@ -165,6 +164,7 @@ int main()
      * 读取地图
      */
     Mat img = imread(config["MapFile_address"].as<string>());
+    assert(img.data);
     cv::Mat dstImage = img.clone();
     for (size_t i = 0; i < dstImage.rows; i++)
     {

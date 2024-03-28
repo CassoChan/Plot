@@ -1,7 +1,7 @@
 # 地图路径
-MapFile_address: "../../PoseData/map1.pgm"
+MapFile_address: "../../PoseData/map2.pgm"
 # 初始化原点路径                                
-OriginFile_address: "../../PoseData/OriginPose/OriginPose5.txt"
+OriginFile_address: "../../PoseData/OriginPose/OriginPose1.txt"
 # 轨迹路径
 TrajectoryFile_address: "../../PoseData/Trajectory/2024-03-26 08_48_46.txt"
 
