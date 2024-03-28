@@ -1,9 +1,9 @@
 # 地图路径
 MapFile_address: "../../PoseData/map1.pgm"
 # 初始化原点路径                                
-OriginFile_address: "../../PoseData/OriginPose/OriginPose1.txt"
+OriginFile_address: "../../PoseData/OriginPose/OriginPose5.txt"
 # 轨迹路径
-TrajectoryFile_address: "../../PoseData/Trajectory/2024-03-27 09_18_42.txt"
+TrajectoryFile_address: "../../PoseData/Trajectory/2024-03-26 08_48_46.txt"
 
 radius: 0.4           # 热力图搜索半径
 TPointSize: 20        # 轨迹点的大小
@@ -15,4 +15,4 @@ OffSetByHand_x: 0     # 手动偏移x
 OffSetByHand_y: 50    # 手动偏移y
 
 # 输出的文件名，默认路径为drawing目录下
-OutputFileName: trajectory2
+OutputFileName: trajectory

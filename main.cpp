@@ -1,4 +1,5 @@
 #include <matplotlibcpp17/pyplot.h>
+#include <math.h>
 #include <iostream>
 #include <vector>
 
@@ -13,11 +14,15 @@
 using namespace std;
 using namespace cv;
 
+#define PI 3.1415926
+
 vector<float> map_x;
 vector<float> map_y;
 vector<float> map_color;
 
+bool inverse_flag = false;
 vector<float> OriginOffset;
+vector<float> OriginOffset1;
 
 vector<float> x;
 vector<float> y;
@@ -44,6 +49,10 @@ float to_float(string s)
                 {
                     result = result * 10 + s[i] - 48;
                 }
+                if (s[i] == '-')
+                {
+                    inverse_flag = true;
+                }
             }
             for (i = s.size() - 1; i >= point_index - 1; i--) // 计算小数部分
             {
@@ -59,7 +68,15 @@ float to_float(string s)
                     }
                 }
             }
-            result = result + under_0; // 把整数部分和小数部分相加
+
+            if (inverse_flag == true)
+            {
+                result = -(result + under_0); // 把整数部分和小数部分相加
+            }
+            else
+            {
+                result = result + under_0; // 把整数部分和小数部分相加
+            }
         }
     }
     else // 字符串只有整数部分
@@ -101,6 +118,52 @@ int main()
     pybind11::scoped_interpreter guard{};
     auto plt = matplotlibcpp17::pyplot::import();
 
+    /**
+     * @brief 读入原点坐标的修改
+     */
+    std::string file = config["OriginFile_address"].as<string>();
+    if (access(file.c_str(), 0) == -1)
+    {
+        OriginOffset1 = {0, 0, 0, 1, 0, 0, 0};
+        cout << "No Origin file, the default origin pose is used : t[0, 0, 0] , q[1, 0, 0, 0]." << endl;
+    }
+    else
+    {
+        ifstream OriginFile(file);
+        OriginFile.seekg(0, ios::end);
+        char ch;
+        do
+        {
+            OriginFile.seekg(-2, ios::cur);
+            if ((int)OriginFile.tellg() <= 0)
+            {
+                OriginFile.seekg(0);
+                break;
+            }
+            OriginFile.get(ch);
+        } while (ch != '\n');
+        string lastLine;
+        while (getline(OriginFile, lastLine, ','))
+        {
+            OriginOffset1.push_back(to_float(lastLine));
+            // cout << to_float(lastLine) << endl;
+        }
+        OriginFile.close();
+    }
+
+    OriginOffset = OriginOffset1;
+    OriginOffset1[0] = -OriginOffset1[0];
+    OriginOffset1[1] = -OriginOffset1[1];
+
+    Eigen::Quaterniond q1(OriginOffset1[3], OriginOffset1[4], OriginOffset1[5], OriginOffset1[6]);
+    Eigen::Vector3d Euler = q1.matrix().eulerAngles(2, 1, 0);
+    OriginOffset[0] = sqrt(pow(OriginOffset1[0], 2) + pow(OriginOffset1[1], 2)) * cos(atan2(OriginOffset1[1], OriginOffset1[0]) + Euler[0]);
+    OriginOffset[1] = sqrt(pow(OriginOffset1[0], 2) + pow(OriginOffset1[1], 2)) * sin(atan2(OriginOffset1[1], OriginOffset1[0]) + Euler[0]);
+    Eigen::Vector3d t1 = Eigen::Vector3d(OriginOffset[0], OriginOffset[1], OriginOffset[2]);
+
+    /**
+     * 读取地图
+     */
     Mat img = imread(config["MapFile_address"].as<string>());
     cv::Mat dstImage = img.clone();
     for (size_t i = 0; i < dstImage.rows; i++)
@@ -111,43 +174,36 @@ int main()
             uchar temp = intensity.val[0];
             if (temp != 0 && temp != 128)
             {
-                map_x.push_back(j * resolution + origin_x + OffSetByHand_x);
-                map_y.push_back(-(i * resolution - origin_y) + OffSetByHand_y);
+                float tmp_x = j * resolution + origin_x + OffSetByHand_x;
+                float tmp_y = -(i * resolution - origin_y) + OffSetByHand_y;
+                map_x.push_back(tmp_x * cos(Euler[0]) - tmp_y * sin(Euler[0]) + OriginOffset[0]);
+                map_y.push_back(tmp_x * sin(Euler[0]) + tmp_y * cos(Euler[0]) + OriginOffset[1]);
                 map_color.push_back(255.0 - (float)temp);
             }
         }
     }
-    plt.figure(Args(), Kwargs("figsize"_a = py::make_tuple(dstImage.cols / 10.0, dstImage.rows / 10.0)));
+    if ((Euler[0] >= 0 && Euler[0] <= PI / 90.0) || (Euler[0] >= PI * (1 - 1 / 90.0) && Euler[0] <= PI * (1 + 1 / 90.0)) || Euler[0] >= PI * (2 - 1 / 90.0))
+    {
+        cout << "Model1--" << Euler[0] / PI * 180 << endl;
+        plt.figure(Args(), Kwargs("figsize"_a = py::make_tuple(dstImage.cols / 10.0, dstImage.rows / 10.0)));
+    }
+    else if ((Euler[0] >= PI * (0.5 - 1 / 90.0) && Euler[0] <= PI * (0.5 + 1 / 90.0)))
+    {
+        cout << "Model2--" << Euler[0] / PI * 180 << endl;
+        plt.figure(Args(), Kwargs("figsize"_a = py::make_tuple(dstImage.rows / 10.0, dstImage.cols / 10.0)));
+    }
+    else
+    {
+        cout << "The angle value is not within the appropriate range." << endl;
+        return 0;
+    }
+
     plt.scatter(Args(map_x, map_y),
                 Kwargs("c"_a = map_color, "s"_a = MapPointSize, "cmap"_a = "Greys"));
 
     /**
-     * @brief 读入原点坐标的修改
+     * 读取轨迹位姿
      */
-    ifstream OriginFile(config["OriginFile_address"].as<string>());
-    assert(OriginFile);
-    OriginFile.seekg(0, ios::end);
-    char ch;
-    do
-    {
-        OriginFile.seekg(-2, ios::cur);
-        if ((int)OriginFile.tellg() <= 0)
-        {
-            OriginFile.seekg(0);
-            break;
-        }
-        OriginFile.get(ch);
-    } while (ch != '\n');
-    string lastLine;
-    while (getline(OriginFile, lastLine, ','))
-    {
-        OriginOffset.push_back(to_float(lastLine));
-    }
-    OriginFile.close();
-
-    Eigen::Vector3d t1 = Eigen::Vector3d(OriginOffset[0], OriginOffset[1], OriginOffset[2]);
-    Eigen::Quaterniond q1(OriginOffset[3], OriginOffset[4], OriginOffset[5], OriginOffset[6]);
-
     ifstream TrajectoryFile(config["TrajectoryFile_address"].as<string>());
     assert(TrajectoryFile);
     string line;
@@ -202,18 +258,23 @@ int main()
 
     // 初始化后的原点
     plt.scatter(Args(0, 0),
-                Kwargs("c"_a = "r", "s"_a = MapPointSize * 100, "marker"_a = "*"));
+                Kwargs("c"_a = "r", "s"_a = MapPointSize * 100, "marker"_a = "*", "label"_a = "inital_origin"));
     // 图片原点
-    plt.scatter(Args(-OriginOffset[0], -OriginOffset[1]),
-                Kwargs("c"_a = "y", "s"_a = MapPointSize * 100, "marker"_a = "."));
+    plt.scatter(Args(OriginOffset[0], OriginOffset[1]),
+                Kwargs("c"_a = "g", "s"_a = MapPointSize * 100, "marker"_a = ".", "label"_a = "origin"));
+
     // 箭头指向，坐标变换用，图片原点指向初始化后原点
-    // plt.quiver(Args(-OriginOffset[0], -OriginOffset[1], OriginOffset[0], OriginOffset[1]), Kwargs("units"_a = "width"))
+    float dx = 0 - OriginOffset[0];
+    float dy = 0 - OriginOffset[1];
+    plt.quiver(Args(OriginOffset[0], OriginOffset[1], dx, dy),
+               Kwargs("color"_a = "y", "angles"_a = "xy", "scale"_a = 1.03, "scale_units"_a = "xy", "width"_a = 0.005));
 
     auto cs = plt.scatter(Args(x, y),
                           Kwargs("c"_a = ValidPoint, "s"_a = TPointSize, "cmap"_a = "jet"));
 
     plt.title(Args("Trajectory"));
     plt.colorbar(Args(cs.unwrap()));
+    plt.legend();
 
     std::string folderpath = "../drawing";
     if (access(folderpath.c_str(), 0) == -1)
