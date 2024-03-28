@@ -269,12 +269,17 @@ int main()
     plt.quiver(Args(OriginOffset[0], OriginOffset[1], dx, dy),
                Kwargs("color"_a = "y", "angles"_a = "xy", "scale"_a = 1.03, "scale_units"_a = "xy", "width"_a = 0.005));
 
+    // 色卡
     auto cs = plt.scatter(Args(x, y),
                           Kwargs("c"_a = ValidPoint, "s"_a = TPointSize, "cmap"_a = "jet"));
-
-    plt.title(Args("Trajectory"));
     plt.colorbar(Args(cs.unwrap()));
+
+    // 图例
     plt.legend();
+
+    // 标题
+    plt.title(Args("Trajectory"));
+
 
     std::string folderpath = "../drawing";
     if (access(folderpath.c_str(), 0) == -1)

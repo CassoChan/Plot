@@ -1,5 +1,5 @@
 # 地图路径
-MapFile_address: "../../PoseData/map2.pgm"
+MapFile_address: "../../PoseData/map1.pgm"
 # 初始化原点路径                                
 OriginFile_address: "../../PoseData/OriginPose/OriginPose1.txt"
 # 轨迹路径

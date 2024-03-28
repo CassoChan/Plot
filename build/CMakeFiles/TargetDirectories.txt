@@ -1,0 +1,3 @@
+/home/casun/Plot/build/CMakeFiles/rebuild_cache.dir
+/home/casun/Plot/build/CMakeFiles/edit_cache.dir
+/home/casun/Plot/build/CMakeFiles/plot.dir
